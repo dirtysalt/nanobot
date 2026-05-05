@@ -197,6 +197,7 @@ if DISCORD_AVAILABLE:
                 ("restart", "Restart the bot", "/restart"),
                 ("status", "Show bot status", "/status"),
                 ("history", "Show recent conversation messages", "/history"),
+                ("model", "Switch the runtime model", "/model"),
             )
 
             for name, description, command_text in commands:

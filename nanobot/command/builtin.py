@@ -366,6 +366,35 @@ async def cmd_history(ctx: CommandContext) -> OutboundMessage:
     )
 
 
+async def cmd_model(ctx: CommandContext) -> OutboundMessage:
+    """Switch the runtime model by updating config.json.
+
+    Usage: /model <name>  e.g. /model anthropic/claude-opus-4-6
+    """
+    from nanobot.config.loader import get_config_path, load_config, save_config
+
+    msg = ctx.msg
+    args = ctx.args.strip()
+    if not args:
+        return OutboundMessage(
+            channel=msg.channel, chat_id=msg.chat_id,
+            content="Usage: /model <name> — e.g. /model anthropic/claude-opus-4-6",
+            metadata=dict(msg.metadata or {}),
+        )
+
+    config_path = get_config_path()
+    config = load_config(config_path)
+    old_model = config.agents.defaults.model
+    config.agents.defaults.model = args
+    save_config(config, config_path)
+
+    return OutboundMessage(
+        channel=msg.channel, chat_id=msg.chat_id,
+        content=f"Model updated: `{old_model}` → `{args}`\nWill take effect on the next turn.",
+        metadata={**dict(msg.metadata or {}), "render_as": "text"},
+    )
+
+
 async def cmd_help(ctx: CommandContext) -> OutboundMessage:
     """Return available slash commands."""
     return OutboundMessage(
@@ -385,6 +414,7 @@ def build_help_text() -> str:
         "/restart — Restart the bot",
         "/status — Show bot status",
         "/history [n] — Show the last N conversation messages (default 10)",
+        "/model <name> — Switch the runtime model",
         "/dream — Manually trigger Dream consolidation",
         "/dream-log — Show what the last Dream changed",
         "/dream-restore — Revert memory to a previous state",
@@ -402,6 +432,8 @@ def register_builtin_commands(router: CommandRouter) -> None:
     router.exact("/status", cmd_status)
     router.exact("/history", cmd_history)
     router.prefix("/history ", cmd_history)
+    router.exact("/model", cmd_model)
+    router.prefix("/model ", cmd_model)
     router.exact("/dream", cmd_dream)
     router.exact("/dream-log", cmd_dream_log)
     router.prefix("/dream-log ", cmd_dream_log)

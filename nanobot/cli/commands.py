@@ -531,6 +531,10 @@ def serve(
     bus = MessageBus()
     provider = _make_provider(runtime_config)
     session_manager = SessionManager(runtime_config.workspace_path)
+
+    from nanobot.providers.factory import build_provider_snapshot, load_provider_snapshot
+    provider_snapshot = build_provider_snapshot(runtime_config)
+
     agent_loop = AgentLoop(
         bus=bus,
         provider=provider,
@@ -554,6 +558,8 @@ def serve(
         consolidation_ratio=runtime_config.agents.defaults.consolidation_ratio,
         max_messages=runtime_config.agents.defaults.max_messages,
         tools_config=runtime_config.tools,
+        provider_snapshot_loader=load_provider_snapshot,
+        provider_signature=provider_snapshot.signature,
     )
 
     model_name = runtime_config.agents.defaults.model
@@ -1023,6 +1029,9 @@ def agent(
     bus = MessageBus()
     provider = _make_provider(config)
 
+    from nanobot.providers.factory import build_provider_snapshot, load_provider_snapshot
+    provider_snapshot = build_provider_snapshot(config)
+
     # Preserve existing single-workspace installs, but keep custom workspaces clean.
     if is_default_workspace(config.workspace_path):
         _migrate_cron_store(config)
@@ -1059,6 +1068,8 @@ def agent(
         consolidation_ratio=config.agents.defaults.consolidation_ratio,
         max_messages=config.agents.defaults.max_messages,
         tools_config=config.tools,
+        provider_snapshot_loader=load_provider_snapshot,
+        provider_signature=provider_snapshot.signature,
     )
     restart_notice = consume_restart_notice_from_env()
     if restart_notice and should_show_cli_restart_notice(restart_notice, session_id):
