@@ -329,6 +329,19 @@ PROVIDERS: tuple[ProviderSpec, ...] = (
             ("kimi-k2.6", {"temperature": 1.0}),
         ),
     ),
+    # Kimi Coding Plan: dedicated coding-focused endpoint at api.kimi.com
+    ProviderSpec(
+        name="kimi",
+        keywords=("kimi-plan",),
+        env_key="KIMI_API_KEY",
+        display_name="Kimi",
+        backend="openai_compat",
+        default_api_base="https://api.kimi.com/coding/v1",
+        model_overrides=(
+            ("kimi-k2.5", {"temperature": 1.0}),
+            ("kimi-k2.6", {"temperature": 1.0}),
+        ),
+    ),
     # MiniMax: OpenAI-compatible API
     ProviderSpec(
         name="minimax",
